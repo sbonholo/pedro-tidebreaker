@@ -1,8 +1,42 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06121a">
 <title>Tidebreaker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<script>
+/* friendly crash toast: any uncaught error, rejected promise, or a module that never booted */
+(function(){
+  var shown=false;
+  function show(){
+    if(shown) return; shown=true;
+    function add(){ var b=document.createElement('button'); b.id='crash'; b.type='button'; b.textContent='Something went wrong - tap to reload'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); }
+    document.body ? add() : addEventListener('DOMContentLoaded', add);
+  }
+  window.onerror=function(msg){ if(/ResizeObserver loop/.test(String(msg))) return; show(); };
+  addEventListener('unhandledrejection', show);
+  addEventListener('load', function(){ if(!window.__tbBooted) show(); });
+})();
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.min.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+<link rel="modulepreload" href="vendor/three/three.module.min.js">
+<link rel="preload" href="vendor/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Self-hosted fonts (@fontsource, SIL OFL 1.1) — no third-party requests at runtime */
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:600;font-display:swap;src:url(vendor/fonts/big-shoulders-display-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:800;font-display:swap;src:url(vendor/fonts/big-shoulders-display-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:900;font-display:swap;src:url(vendor/fonts/big-shoulders-display-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:400;font-display:swap;src:url(vendor/fonts/barlow-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:500;font-display:swap;src:url(vendor/fonts/barlow-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:600;font-display:swap;src:url(vendor/fonts/barlow-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(vendor/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2")}
+</style>
 <style>
 /* Layout: full-bleed 3D sea; HUD pinned to the corners like a helm display; menu anchored bottom-left over the cinematic orbit. */
 :root{
@@ -59,7 +93,7 @@ body{margin:0;background:var(--sea);color:var(--ink);font-family:var(--body);-we
   background:linear-gradient(to top,rgba(4,14,20,.88),rgba(4,14,20,.55) 55%,rgba(4,14,20,0));pointer-events:none}
 .sheet .inner{max-width:1080px;margin:0 auto;padding-top:120px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px 48px;align-items:end;pointer-events:auto}
 .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--signal);font-weight:600}
-h1{font-family:var(--display);font-weight:900;font-size:clamp(64px,11vw,140px);line-height:.82;margin:8px 0 14px;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(64px,8.5vw,120px);line-height:.82;margin:8px 0 14px;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 .lede{font-size:17px;line-height:1.5;color:var(--muted);max-width:44ch;margin:0}
 .spec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:16px}
 .spec div{background:rgba(7,22,30,.7);padding:10px 12px;display:grid;gap:2px}
@@ -71,12 +105,24 @@ h1{font-family:var(--display);font-weight:900;font-size:clamp(64px,11vw,140px);l
 button.go{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:#1b1206;background:var(--signal);border:0;border-radius:6px;padding:14px 30px;cursor:pointer;box-shadow:0 8px 30px rgba(255,181,71,.25)}
 button.go:hover{filter:brightness(1.07)}
 button.go:focus-visible,button.ghost:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:12px 16px;cursor:pointer;margin-left:10px}
+button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;min-height:44px;padding:12px 16px;cursor:pointer;margin-left:10px}
 .splits{font-family:var(--mono);font-size:15px;line-height:1.8;font-variant-numeric:tabular-nums;margin:0 0 18px;padding:0;list-style:none}
 .splits li{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid var(--line)}
 .pb{color:var(--signal)}
 
-#mute{position:fixed;z-index:6;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;cursor:pointer;font-family:var(--body);font-weight:600}
+#crash{position:fixed;z-index:50;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);min-height:44px;padding:0 18px;font:600 14px/1 var(--body);letter-spacing:.04em;color:#1b1206;background:var(--signal);border:0;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,.4);cursor:pointer;white-space:nowrap}
+/* First-launch how-to-play */
+.howto{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(4,14,20,.6)}
+.howto .card{width:min(440px,100%);padding:22px 22px 20px;background:rgba(7,22,30,.88)}
+.howto h2{font-family:var(--display);font-weight:900;font-size:40px;line-height:.9;margin:6px 0 16px;text-transform:uppercase;letter-spacing:.01em}
+.howto ol{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:14px;counter-reset:s}
+.howto li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:4px 10px;font-size:15px;line-height:1.45;color:var(--muted)}
+.howto li::before{content:counter(s);grid-row:span 2;font-family:var(--display);font-weight:900;font-size:34px;line-height:.9;color:var(--signal)}
+.howto li b{color:var(--ink);font-weight:600}
+.howto .tc{display:none}
+@media (pointer:coarse){.howto .kb{display:none}.howto .tc{display:inline}}
+.howto button.go{width:100%}
+#mute{position:fixed;z-index:6;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;min-height:44px;min-width:44px;padding:0 14px;cursor:pointer;font-family:var(--body);font-weight:600}
 
 /* Touch controls */
 #touch{position:fixed;inset:auto 0 0 0;z-index:6;display:none;justify-content:space-between;padding:0 max(14px,env(safe-area-inset-left,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-right,0px));pointer-events:none}
@@ -97,9 +143,13 @@ button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--
   #spd{font-size:42px}
   .lede{font-size:15px}
   .keys{display:none}
+  .label{font-size:12px}
 }
+@media (pointer:coarse){.label{font-size:12px}}
 @media (prefers-reduced-motion:reduce){#toast,#msg{transition:none}}
 </style>
+</head>
+<body>
 
 <div id="stage"></div>
 
@@ -173,12 +223,19 @@ button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--
   </div>
 </section>
 
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-} }
-</script>
+<section class="howto" id="howto" role="dialog" aria-modal="true" aria-labelledby="howtoT" hidden>
+  <div class="card chip">
+    <div class="eyebrow">How to play</div>
+    <h2 id="howtoT">Three steps</h2>
+    <ol>
+      <li><b>Drive the boat.</b><span><span class="kb">W or ↑ for throttle, S or ↓ to go astern, A and D to steer.</span><span class="tc">Hold GAS to go and BACK to reverse. Use the arrows to steer.</span></span></li>
+      <li><b>Pass between the buoys.</b><span>Red to port, green to starboard. Follow the amber arrow and light beams to the next mark.</span></li>
+      <li><b>Beat the clock.</b><span>Two laps of twelve marks. Ran aground? Back off and steer clear<span class="kb">, or press R to return to the last mark</span>.</span></li>
+    </ol>
+    <button class="go" id="howtoOk" type="button">Got it</button>
+  </div>
+</section>
+
 <script type="module">
 import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water.js';
@@ -302,7 +359,8 @@ scene.add(sky);
 
 const sunLight=new THREE.DirectionalLight(0xffcf98, 2.4);
 sunLight.castShadow=true;
-sunLight.shadow.mapSize.set(1024,1024);
+const isPhone=matchMedia('(pointer:coarse)').matches && Math.min(screen.width,screen.height)<768;
+sunLight.shadow.mapSize.setScalar(isPhone?512:1024); // lighter shadow map on phones
 Object.assign(sunLight.shadow.camera,{left:-14,right:14,top:14,bottom:-14,near:1,far:300});
 sunLight.shadow.bias=-0.0005; sunLight.shadow.normalBias=0.03;
 scene.add(sunLight, sunLight.target);
@@ -639,6 +697,15 @@ $('start').addEventListener('click', startRace);
 $('again').addEventListener('click', startRace);
 $('toMenu').addEventListener('click', freeCruise);
 
+/* first-launch how-to-play (dismissal remembered) */
+if(!store.get('tidebreaker_howto')){
+  $('howto').hidden=false;
+  $('howtoOk').focus({preventScroll:true});
+}
+function closeHowto(){ $('howto').hidden=true; store.set('tidebreaker_howto','1'); $('start').focus({preventScroll:true}); }
+$('howtoOk').addEventListener('click', closeHowto);
+addEventListener('keydown',e=>{ if(!$('howto').hidden && e.code==='Escape') closeHowto(); });
+
 function updateMarkHud(){
   const lap=Math.min(LAPS, Math.floor(S.passed/NG)+1);
   const m=(S.passed%NG)+1;
@@ -883,16 +950,33 @@ function drawMap(active){
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
 const clock=new THREE.Clock();
-let elapsed=0;
+let elapsed=0, rafId=0;
 function frame(){
   const dt=Math.min(clock.getDelta(), 0.05);
   elapsed+=dt;
   step(dt, elapsed);
   water.material.uniforms.time.value+=dt*0.8;
   renderer.render(scene,camera);
-  requestAnimationFrame(frame);
+  rafId=requestAnimationFrame(frame);
 }
 frame();
+window.__tbBooted=true;
+
+/* pause loop + audio while the tab is hidden; resume cleanly on return */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    cancelAnimationFrame(rafId); rafId=0;
+    for(const k in keys) keys[k]=false;
+    for(const k in touch) touch[k]=false;
+    document.querySelectorAll('#touch button.on').forEach(b=>b.classList.remove('on'));
+    audio?.ctx.suspend?.();
+  } else if(!rafId){
+    clock.getDelta(); // drop the time spent hidden
+    if(audio) audio.ctx.resume?.();
+    rafId=requestAnimationFrame(frame);
+  }
+});
 </script>
 
-</body></html>
+</body>
+</html>
