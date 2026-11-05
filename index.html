@@ -899,16 +899,31 @@ function drawMap(active){
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
 const clock=new THREE.Clock();
-let elapsed=0;
+let elapsed=0, rafId=0;
 function frame(){
   const dt=Math.min(clock.getDelta(), 0.05);
   elapsed+=dt;
   step(dt, elapsed);
   water.material.uniforms.time.value+=dt*0.8;
   renderer.render(scene,camera);
-  requestAnimationFrame(frame);
+  rafId=requestAnimationFrame(frame);
 }
 frame();
+
+/* pause loop + audio while the tab is hidden; resume cleanly on return */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    cancelAnimationFrame(rafId); rafId=0;
+    for(const k in keys) keys[k]=false;
+    for(const k in touch) touch[k]=false;
+    document.querySelectorAll('#touch button.on').forEach(b=>b.classList.remove('on'));
+    audio?.ctx.suspend?.();
+  } else if(!rafId){
+    clock.getDelta(); // drop the time spent hidden
+    if(audio) audio.ctx.resume?.();
+    rafId=requestAnimationFrame(frame);
+  }
+});
 </script>
 
 </body>
