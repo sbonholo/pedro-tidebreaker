@@ -335,7 +335,8 @@ scene.add(sky);
 
 const sunLight=new THREE.DirectionalLight(0xffcf98, 2.4);
 sunLight.castShadow=true;
-sunLight.shadow.mapSize.set(1024,1024);
+const isPhone=matchMedia('(pointer:coarse)').matches && Math.min(screen.width,screen.height)<768;
+sunLight.shadow.mapSize.setScalar(isPhone?512:1024); // lighter shadow map on phones
 Object.assign(sunLight.shadow.camera,{left:-14,right:14,top:14,bottom:-14,near:1,far:300});
 sunLight.shadow.bias=-0.0005; sunLight.shadow.normalBias=0.03;
 scene.add(sunLight, sunLight.target);
