@@ -111,6 +111,17 @@ button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--
 .pb{color:var(--signal)}
 
 #crash{position:fixed;z-index:50;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);min-height:44px;padding:0 18px;font:600 14px/1 var(--body);letter-spacing:.04em;color:#1b1206;background:var(--signal);border:0;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,.4);cursor:pointer;white-space:nowrap}
+/* First-launch how-to-play */
+.howto{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(4,14,20,.6)}
+.howto .card{width:min(440px,100%);padding:22px 22px 20px;background:rgba(7,22,30,.88)}
+.howto h2{font-family:var(--display);font-weight:900;font-size:40px;line-height:.9;margin:6px 0 16px;text-transform:uppercase;letter-spacing:.01em}
+.howto ol{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:14px;counter-reset:s}
+.howto li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:4px 10px;font-size:15px;line-height:1.45;color:var(--muted)}
+.howto li::before{content:counter(s);grid-row:span 2;font-family:var(--display);font-weight:900;font-size:34px;line-height:.9;color:var(--signal)}
+.howto li b{color:var(--ink);font-weight:600}
+.howto .tc{display:none}
+@media (pointer:coarse){.howto .kb{display:none}.howto .tc{display:inline}}
+.howto button.go{width:100%}
 #mute{position:fixed;z-index:6;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;min-height:44px;min-width:44px;padding:0 14px;cursor:pointer;font-family:var(--body);font-weight:600}
 
 /* Touch controls */
@@ -209,6 +220,19 @@ button.ghost{font-family:var(--body);font-weight:600;font-size:14px;color:var(--
       <ul class="splits" id="rSplits"></ul>
       <button class="go" id="again" type="button">Race again</button><button class="ghost" id="toMenu" type="button">Free cruise</button>
     </div>
+  </div>
+</section>
+
+<section class="howto" id="howto" role="dialog" aria-modal="true" aria-labelledby="howtoT" hidden>
+  <div class="card chip">
+    <div class="eyebrow">How to play</div>
+    <h2 id="howtoT">Three steps</h2>
+    <ol>
+      <li><b>Drive the boat.</b><span><span class="kb">W or ↑ for throttle, S or ↓ to go astern, A and D to steer.</span><span class="tc">Hold GAS to go and BACK to reverse. Use the arrows to steer.</span></span></li>
+      <li><b>Pass between the buoys.</b><span>Red to port, green to starboard. Follow the amber arrow and light beams to the next mark.</span></li>
+      <li><b>Beat the clock.</b><span>Two laps of twelve marks. Ran aground? Back off and steer clear<span class="kb">, or press R to return to the last mark</span>.</span></li>
+    </ol>
+    <button class="go" id="howtoOk" type="button">Got it</button>
   </div>
 </section>
 
@@ -672,6 +696,15 @@ function freeCruise(){
 $('start').addEventListener('click', startRace);
 $('again').addEventListener('click', startRace);
 $('toMenu').addEventListener('click', freeCruise);
+
+/* first-launch how-to-play (dismissal remembered) */
+if(!store.get('tidebreaker_howto')){
+  $('howto').hidden=false;
+  $('howtoOk').focus({preventScroll:true});
+}
+function closeHowto(){ $('howto').hidden=true; store.set('tidebreaker_howto','1'); $('start').focus({preventScroll:true}); }
+$('howtoOk').addEventListener('click', closeHowto);
+addEventListener('keydown',e=>{ if(!$('howto').hidden && e.code==='Escape') closeHowto(); });
 
 function updateMarkHud(){
   const lap=Math.min(LAPS, Math.floor(S.passed/NG)+1);
